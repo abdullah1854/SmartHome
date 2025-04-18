@@ -24,11 +24,16 @@ external_components:
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
-  
-  # Fallback AP in case WiFi connection fails
+
+  manual_ip:
+    static_ip: 192.168.29.100
+    gateway:   192.168.29.1
+    subnet:    255.255.255.0
+
   ap:
     ssid: "${name} Fallback Hotspot"
     password: !secret ap_password
+
 
 api:
   encryption:

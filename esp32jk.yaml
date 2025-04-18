@@ -1,0 +1,177 @@
+substitutions:
+  name: esp32-jk-bms
+  friendly_name: "ESP32 JK-BMS"
+  device_description: "Monitor and control JK-BMS via bluetooth"
+  mac_address: "C8:47:80:29:0D:28"  # Kept your existing BMS MAC address
+  protocol_version: JK04  # Change this based on your JK-BMS hardware version
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  comment: ${device_description}
+  min_version: 2024.6.0
+  project:
+    name: "syssi.esphome-jk-bms"
+    version: 2.1.0
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf  # Better stability with BLE
+
+external_components:
+  - source: github://syssi/esphome-jk-bms@main
+    refresh: 0s
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  manual_ip:             # <-- two‑space indent under wifi:
+    static_ip: 192.168.29.101
+    gateway:   192.168.29.1
+    subnet:    255.255.255.0
+
+  ap:
+    ssid: "${name} Fallback Hotspot"
+    password: !secret ap_password
+
+api:
+  encryption:
+    key: "9sIZ0IRZQxWMeDyX2hXFYVFJ54EA70QHNVBMD8cIszA="
+  reboot_timeout: 0s
+
+ota:
+  - platform: esphome
+    password: "f33011b6e0895ba7a3d4b8b7c7e305db"
+    on_begin:
+      then:
+        - switch.turn_off: ble_client_switch0
+        - logger.log: "BLE connection suspended for OTA update"
+
+# MQTT setup (commented out as in your original)
+#mqtt:
+#  broker: !secret mqtt_host
+#  username: !secret mqtt_username
+#  password: !secret mqtt_password
+#  client_id: ${name}
+#  discovery: true
+#  discovery_prefix: homeassistant
+
+logger:
+  level: DEBUG
+  logs:
+    esp32_ble_tracker: INFO
+    esp32_ble_client: INFO
+
+esp32_ble_tracker:
+  scan_parameters:
+    active: false
+
+ble_client:
+  - mac_address: ${mac_address}
+    id: client0
+
+# JK BMS configuration (replacing JBD BMS)
+jk_bms_ble:
+  - ble_client_id: client0
+    protocol_version: ${protocol_version}
+    throttle: 5s
+    id: bms0
+
+binary_sensor:
+  - platform: jk_bms_ble
+    balancing:
+      name: "${name} balancing"
+    online_status:
+      name: "${name} online status"
+
+sensor:
+  - platform: jk_bms_ble
+    jk_bms_ble_id: bms0
+    min_cell_voltage:
+      name: "${name} min cell voltage"
+    max_cell_voltage:
+      name: "${name} max cell voltage"
+    min_voltage_cell:
+      name: "${name} min voltage cell"
+    max_voltage_cell:
+      name: "${name} max voltage cell"
+    delta_cell_voltage:
+      name: "${name} delta cell voltage"
+    average_cell_voltage:
+      name: "${name} average cell voltage"
+    total_voltage:
+      name: "${name} total voltage"
+    current:
+      name: "${name} current"
+    power:
+      name: "${name} power"
+    charging_power:
+      name: "${name} charging power"
+    discharging_power:
+      name: "${name} discharging power"
+    state_of_charge:
+      name: "${name} state of charge"
+    capacity_remaining:
+      name: "${name} capacity remaining"
+    power_tube_temperature:
+      name: "${name} power tube temperature"
+    temperature_sensor_1:
+      name: "${name} temperature 1"
+    temperature_sensor_2:
+      name: "${name} temperature 2"
+    # Cell voltages from JK-BMS
+    cell_voltage_1:
+      name: "${name} cell voltage 1"
+    cell_voltage_2:
+      name: "${name} cell voltage 2"
+    cell_voltage_3:
+      name: "${name} cell voltage 3"
+    cell_voltage_4:
+      name: "${name} cell voltage 4"
+    cell_voltage_5:
+      name: "${name} cell voltage 5"
+    cell_voltage_6:
+      name: "${name} cell voltage 6"
+    cell_voltage_7:
+      name: "${name} cell voltage 7"
+    cell_voltage_8:
+      name: "${name} cell voltage 8"
+    cell_voltage_9:
+      name: "${name} cell voltage 9"
+    cell_voltage_10:
+      name: "${name} cell voltage 10"
+    cell_voltage_11:
+      name: "${name} cell voltage 11"
+    cell_voltage_12:
+      name: "${name} cell voltage 12"
+    cell_voltage_13:
+      name: "${name} cell voltage 13"
+    cell_voltage_14:
+      name: "${name} cell voltage 14"
+    cell_voltage_15:
+      name: "${name} cell voltage 15"
+    cell_voltage_16:
+      name: "${name} cell voltage 16"
+    balancing_current:
+      name: "${name} balancing current"
+    total_runtime:
+      name: "${name} total runtime"
+
+text_sensor:
+  - platform: jk_bms_ble
+    operation_status:
+      name: "${name} operation status"
+    total_runtime_formatted:
+      name: "${name} total runtime formatted"
+
+switch:
+  - platform: jk_bms_ble
+    balancer:
+      name: "${name} balancer"
+
+  - platform: ble_client
+    ble_client_id: client0
+    id: ble_client_switch0
+    name: "${name} enable bluetooth connection"
