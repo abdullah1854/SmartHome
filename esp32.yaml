@@ -41,13 +41,13 @@ ota:
     password: "f33011b6e0895ba7a3d4b8b7c7e305db"
 
 # MQTT setup
-mqtt:
-  broker: !secret mqtt_host
-  username: !secret mqtt_username
-  password: !secret mqtt_password
-  client_id: ${name}
-  discovery: true
-  discovery_prefix: homeassistant
+#mqtt:
+ # broker: !secret mqtt_host
+  #username: !secret mqtt_username
+  #password: !secret mqtt_password
+  #client_id: ${name}
+  #discovery: true
+  #discovery_prefix: homeassistant
 
 logger:
   level: DEBUG
